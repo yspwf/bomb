@@ -1,4 +1,4 @@
-import { Get, Post, Controller, Query, Params, Body } from '../library';
+import { Get, Post, Controller, Query, Params, Body, Middleware } from '../library';
 
 import { AppService } from './appService';
 // import { HomeService } from './homeService';
@@ -8,7 +8,11 @@ import { AppService } from './appService';
 import { Article } from './entity/article';
 import { createConnection, Connection, getManager } from 'typeorm'
 
-@Controller('/app/:status')
+@Middleware(async (ctx:any, next:any)=>{
+  console.log('Middleware1');
+  await next();
+})
+@Controller('/app')
 export class AppController{
 
   constructor(
@@ -24,10 +28,14 @@ export class AppController{
     return 'ewww';
   }
 
+  @Middleware(async (ctx:any, next:any)=>{
+    console.log('Middleware3');
+    await next();
+  })
   @Get('test2')
-  test2(@Query() params: any){
+  async test2(@Query() params: any){
     console.log('Query', params.a);
-    return 'test2';
+    return await this.appService.firstFunc();
   }
 
   @Get('/test1/:id')

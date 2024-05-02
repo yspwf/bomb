@@ -1,4 +1,4 @@
-import { MODULE_METADATA_KEY, INJECTABLE_METADATA_KEY, MODULE_CONTROLLER_METADATA_KEY, MODULE_PROVIDER_METADATA_KEY, MODULE_MODULE_METADATA_KEY, PARAMETER_METADATA } from './contants';
+import { MODULE_METADATA_KEY, INJECTABLE_METADATA_KEY, MODULE_CONTROLLER_METADATA_KEY, MODULE_PROVIDER_METADATA_KEY, MODULE_MODULE_METADATA_KEY, PARAMETER_METADATA, MIDDLEWARE_METADATA } from './contants';
 import { router } from './router';
 
 import { Factory, Register } from './beanFactory';
@@ -8,7 +8,11 @@ import { stringify } from 'querystring';
 
 const controllerLoader = (controllers: any[]) => {
   controllers.forEach((controllerItem:any)=> {
-    //console.log(controllerItem);
+
+    const midlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem);
+    console.log("controllPathValue", controllerItem, midlle);
+    
+
     const constructorParameters = Reflect.getMetadata('design:paramtypes', controllerItem) || [];
     //console.log(constructorParameters);
     const constructorParameterObjs = constructorParameters.map((item: new (...args:any[]) => any) => {
@@ -26,6 +30,10 @@ const controllerLoader = (controllers: any[]) => {
     const realControllPath = controllPath.join('/');
 
     controllerFuncs.forEach( func => {
+      
+      const funcMidlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem.prototype[func]);
+      console.log("funcMidlle", funcMidlle);
+
       const method = Reflect.getMetadata('METHOD_METADATA', controllerItem.prototype[func]);
      
       const methodPath:string[] = [];
@@ -41,7 +49,16 @@ const controllerLoader = (controllers: any[]) => {
 
       console.log("combinePath", `${method} ${combinePath}`);
       let args: any[] = []
-      const execFunc = async (ctx:any) => {
+      const execFunc = [];
+      if(midlle){
+        execFunc.push(midlle);
+      }
+
+      if(funcMidlle){
+        execFunc.push(funcMidlle);
+      }
+      
+      const realFunc = async (ctx:any) => {
         //console.log(ctx.request.body);
         const paramsMetadata:any[] = Reflect.getMetadata(PARAMETER_METADATA, controllerItem.prototype, func);
         //console.log(paramsMetadata);
@@ -67,24 +84,27 @@ const controllerLoader = (controllers: any[]) => {
               }
             })
           }
-
         const res = await app[func](...args);
+        console.log(res);
         ctx.body = res;
       }
-    
+
+      execFunc.push(realFunc);
+      console.log(execFunc);
+
       switch(method){
         case 'get':
-          router.get(combinePath, execFunc);
+          router.get(combinePath, ...execFunc);
           break;
         case 'post':
-          router.post(combinePath, execFunc);
+          router.post(combinePath, ...execFunc);
           break;
-        case 'put':
-          router.put(combinePath, execFunc);
-          break;
-        case 'delete':
-          router.delete(combinePath, execFunc);
-          break;
+        // case 'put':
+        //   router.put(combinePath, execFunc);
+        //   break;
+        // case 'delete':
+        //   router.delete(combinePath, execFunc);
+        //   break;
         default:
           throw new Error('error api method');
           break;

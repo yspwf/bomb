@@ -1,6 +1,10 @@
-import { Get, Post, Controller } from '../../library';
+import { Get, Post, Controller, Middleware } from '../../library';
 import { OrderService } from  './orderService';
 
+@Middleware((ctx:any, next:any)=>{
+  console.log('Middleware2');
+  next();
+})
 @Controller('order')
 export class OrderController{
   constructor(private readonly orderService: OrderService){}

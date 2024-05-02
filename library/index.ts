@@ -14,6 +14,8 @@ import { Params, Query, Body } from './parameter';
 
 import { Bootstrap, controllerLoader, providerLoader }  from './request';
 
+import { Middleware } from './middleware'; 
+
 
 const eachModules = (modules:any) => {
   modules.forEach((moduleElement:any) => {
@@ -73,4 +75,4 @@ const start = (entryModule:any) => {
 
 }
 
-export {Get, Post, Delete, Put, Batch, Bootstrap, start, Controller, Injectable, isInjectable, Factory, router, Register, Params, Query, Body };
+export {Get, Post, Delete, Put, Batch, Bootstrap, start, Controller, Injectable, isInjectable, Factory, router, Register, Params, Query, Body, Middleware };
