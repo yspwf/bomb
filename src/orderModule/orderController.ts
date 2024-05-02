@@ -1,9 +1,9 @@
 import { Get, Post, Controller, Middleware } from '../../library';
 import { OrderService } from  './orderService';
 
-@Middleware((ctx:any, next:any)=>{
+@Middleware(async (ctx:any, next:any)=>{
   console.log('Middleware2');
-  next();
+  await next();
 })
 @Controller('order')
 export class OrderController{

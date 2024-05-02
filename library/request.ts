@@ -3,7 +3,8 @@ import { router } from './router';
 
 import { Factory, Register } from './beanFactory';
 import { server } from './http';
-import { stringify } from 'querystring';
+import { methodType } from './type';
+
 
 
 const controllerLoader = (controllers: any[]) => {
@@ -29,14 +30,13 @@ const controllerLoader = (controllers: any[]) => {
     controllPath.push(...controllPathValue);
     const realControllPath = controllPath.join('/');
 
-    controllerFuncs.forEach( func => {
-      
+    controllerFuncs.forEach((func:string | symbol) => {
       const funcMidlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem.prototype[func]);
       console.log("funcMidlle", funcMidlle);
 
-      const method = Reflect.getMetadata('METHOD_METADATA', controllerItem.prototype[func]);
+      const method:methodType = Reflect.getMetadata('METHOD_METADATA', controllerItem.prototype[func]);
      
-      const methodPath:string[] = [];
+      const methodPath:Array<string> = [];
       const methodPathValue = Reflect.getMetadata('PATH_METADATA', controllerItem.prototype[func]).split('/').filter((item:string) => item !== '');
       methodPath.push(...methodPathValue);
       const path = methodPath.join('/');
@@ -46,10 +46,9 @@ const controllerLoader = (controllers: any[]) => {
       }else{
         combinePath = `/${realControllPath}`;
       }
-
       console.log("combinePath", `${method} ${combinePath}`);
-      let args: any[] = []
-      const execFunc = [];
+
+      const execFunc:Array<any> = [];
       if(midlle){
         execFunc.push(midlle);
       }
@@ -63,6 +62,7 @@ const controllerLoader = (controllers: any[]) => {
         const paramsMetadata:any[] = Reflect.getMetadata(PARAMETER_METADATA, controllerItem.prototype, func);
         //console.log(paramsMetadata);
 
+        let args: Array<string | object | unknown> = []
         if(paramsMetadata){
           //const filterRes = paramsMetadata.filter(item => console.log(item));
             paramsMetadata.filter((param: any) =>
@@ -85,12 +85,10 @@ const controllerLoader = (controllers: any[]) => {
             })
           }
         const res = await app[func](...args);
-        console.log(res);
         ctx.body = res;
       }
 
       execFunc.push(realFunc);
-      console.log(execFunc);
 
       switch(method){
         case 'get':
@@ -99,12 +97,12 @@ const controllerLoader = (controllers: any[]) => {
         case 'post':
           router.post(combinePath, ...execFunc);
           break;
-        // case 'put':
-        //   router.put(combinePath, execFunc);
-        //   break;
-        // case 'delete':
-        //   router.delete(combinePath, execFunc);
-        //   break;
+        case 'put':
+          router.put(combinePath, ...execFunc);
+          break;
+        case 'delete':
+          router.delete(combinePath, ...execFunc);
+          break;
         default:
           throw new Error('error api method');
           break;

@@ -2,7 +2,7 @@ import { MIDDLEWARE_METADATA } from './contants';
 
 const Middleware = (func:Function) => {
   return (target: Object | {[key: string]: any}, key?: string, descriptor?: PropertyDescriptor | undefined) => {
-    console.log(typeof target)
+    //console.log(typeof target)
     if(typeof target === 'function') {
       Reflect.defineMetadata(MIDDLEWARE_METADATA, func, target);
     }
