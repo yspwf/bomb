@@ -11,3 +11,9 @@ export interface MethodMetadata{
   path: string,
   fn: Function
 }
+
+export interface bootstrapMetadata{
+  Controllers?: Array<Function>,
+  Providers?: Array<Function>,
+  Modules?: Array<Function>
+}

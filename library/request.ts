@@ -1,14 +1,13 @@
 import { MODULE_METADATA_KEY, INJECTABLE_METADATA_KEY, MODULE_CONTROLLER_METADATA_KEY, MODULE_PROVIDER_METADATA_KEY, MODULE_MODULE_METADATA_KEY, PARAMETER_METADATA, MIDDLEWARE_METADATA } from './contants';
-import { router } from './router';
+import { router, IMiddleware } from './router';
 
 import { Factory, Register } from './beanFactory';
-import { server } from './http';
-import { methodType } from './type';
+import { methodType, bootstrapMetadata } from './type';
 
 
 
-const controllerLoader = (controllers: any[]) => {
-  controllers.forEach((controllerItem:any)=> {
+const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
+  controllers.forEach((controllerItem:new (...args: any[]) => any)=> {
 
     const midlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem);
     console.log("controllPathValue", controllerItem, midlle);
@@ -32,7 +31,7 @@ const controllerLoader = (controllers: any[]) => {
 
     controllerFuncs.forEach((func:string | symbol) => {
       const funcMidlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem.prototype[func]);
-      console.log("funcMidlle", funcMidlle);
+      //console.log("funcMidlle", funcMidlle);
 
       const method:methodType = Reflect.getMetadata('METHOD_METADATA', controllerItem.prototype[func]);
      
@@ -48,7 +47,7 @@ const controllerLoader = (controllers: any[]) => {
       }
       console.log("combinePath", `${method} ${combinePath}`);
 
-      const execFunc:Array<any> = [];
+      const execFunc:Array<IMiddleware> = [];
       if(midlle){
         execFunc.push(midlle);
       }
@@ -112,15 +111,15 @@ const controllerLoader = (controllers: any[]) => {
 }
 
 
-const providerLoader = (providers: any[]) => {
-  providers.forEach((provider:any) => {
+const providerLoader = (providers: Array<new (...args: any[]) => any>) => {
+  providers.forEach((provider:new (...args: any[]) => any) => {
     Register(provider);
   })
 }
 
 
 
-const Bootstrap = (bootstrapValues:any) => {
+const Bootstrap = (bootstrapValues:bootstrapMetadata) => {
   return (target: new (...args:any[]) => any) => {
     Reflect.defineMetadata(MODULE_METADATA_KEY, true, target);
     

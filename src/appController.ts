@@ -1,4 +1,4 @@
-import { Get, Post, Controller, Query, Params, Body, Middleware } from '../library';
+import { Get, Post, Controller, Query, Params, Body, Middleware, Context } from '../library';
 
 import { AppService } from './appService';
 // import { HomeService } from './homeService';
@@ -8,9 +8,13 @@ import { AppService } from './appService';
 import { Article } from './entity/article';
 import { createConnection, Connection, getManager } from 'typeorm'
 
-@Middleware(async (ctx:any, next:any)=>{
+@Middleware(async (ctx:Context, next:() => Promise<void>)=>{
   console.log('Middleware1');
+  const start = Date.now();
   await next();
+  const ms = Date.now() - start;
+  console.log(`${ctx.method} ${ctx.url} ${ctx.status} - ${ms}ms`);
+  // await next();
 })
 @Controller('/app')
 export class AppController{

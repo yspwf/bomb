@@ -1,4 +1,4 @@
-import { Bootstrap } from '../library';
+import { Bootstrap, Application } from '../library';
 
 import { OrderModule } from './orderModule';
 const Modules:any[] = [OrderModule];
@@ -9,6 +9,7 @@ const Controllers = [AppController];
 import { AppService } from './appService';
 import { UserService } from './User/userService';
 import { HomeService } from './homeService';
+console.log(typeof AppService);
 
 const Providers = [AppService, UserService, HomeService];
 
@@ -21,7 +22,7 @@ import { createConnection, Connection, getManager } from 'typeorm'
 export class Main{
 
   
-  async factory(app:any){
+  async factory(app:Application){
 
     // app.use(async (ctx:any, next:any) => {
     //   console.log('2323')

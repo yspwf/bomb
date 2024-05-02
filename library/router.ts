@@ -1,2 +1,3 @@
-import KoaRouter from 'koa-router';
-export const router = new KoaRouter();
+import KoaRouter, {IMiddleware} from 'koa-router';
+const router = new KoaRouter();
+export {router, IMiddleware};
