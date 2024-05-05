@@ -1,7 +1,7 @@
 {
-  "name": "bomb",
-  "version": "1.0.0",
-  "description": "ts koa api",
+  "name": "bomb_kit.js",
+  "version": "1.0.8",
+  "description": "ts api base on koa",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

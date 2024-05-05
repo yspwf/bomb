@@ -56,10 +56,18 @@ const start = (entryModule:new (...args: any[]) => any) => {
   // console.log('entryModuleResult controller', moduleController);
   // console.log('entryModuleResult provtder', moduleProvider);
   // console.log('entryModuleResult module', moduleModules);
-  providerLoader(moduleProvider);
-  controllerLoader(moduleController);
+  if(moduleProvider){
+    providerLoader(moduleProvider);
+  }
 
-  eachModules(moduleModules);
+  if(moduleController){
+    controllerLoader(moduleController);
+  }
+  
+
+  if(isModule && moduleModules) {
+    eachModules(moduleModules);
+  }
 
   Server.use(router.routes()).use(router.allowedMethods());
   // server.listen(8091, ()=>{

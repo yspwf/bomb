@@ -10,7 +10,7 @@ const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
   controllers.forEach((controllerItem:new (...args: any[]) => any)=> {
 
     const midlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem);
-    console.log("controllPathValue", controllerItem, midlle);
+    // console.log("controllPathValue", controllerItem, midlle);
     
 
     const constructorParameters = Reflect.getMetadata('design:paramtypes', controllerItem) || [];
