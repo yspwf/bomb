@@ -15,7 +15,7 @@ import { Params, Query, Body } from './parameter';
 import { Bootstrap, controllerLoader, providerLoader }  from './request';
 import { methodType, bootstrapMetadata } from './type';
 
-import { Middleware } from './middleware'; 
+import { before, after } from './middleware'; 
 
 
 const eachModules = (modules:Array<new (...args: any[]) => any>) => {
@@ -40,8 +40,12 @@ const start = (entryModule:new (...args: any[]) => any) => {
   Server.use(koaBody({
     // 是否支持 multipart-formdata 的表单
     multipart: true,
-  }))
- 
+    // strict: false,  //设为false
+    formidable: {
+      maxFileSize: 200 * 1024 * 1024
+    }
+  }));
+
   const isModule = Reflect.getMetadata(MODULE_METADATA_KEY, entryModule);
    
   if(isModule){
@@ -63,7 +67,6 @@ const start = (entryModule:new (...args: any[]) => any) => {
   if(moduleController){
     controllerLoader(moduleController);
   }
-  
 
   if(isModule && moduleModules) {
     eachModules(moduleModules);
@@ -84,4 +87,4 @@ const start = (entryModule:new (...args: any[]) => any) => {
 
 }
 
-export {Get, Post, Delete, Put, Batch, Bootstrap, start, Controller, Injectable, isInjectable, Factory, router, Register, Params, Query, Body, Middleware, Context, Server, Application };
+export {Get, Post, Delete, Put, Batch, Bootstrap, start, Controller, Injectable, isInjectable, Factory, router, Register, Params, Query, Body, before, after, Context, Server, Application };

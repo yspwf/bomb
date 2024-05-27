@@ -1,15 +1,16 @@
-import { MODULE_METADATA_KEY, INJECTABLE_METADATA_KEY, MODULE_CONTROLLER_METADATA_KEY, MODULE_PROVIDER_METADATA_KEY, MODULE_MODULE_METADATA_KEY, PARAMETER_METADATA, MIDDLEWARE_METADATA } from './contants';
+import { MODULE_METADATA_KEY, INJECTABLE_METADATA_KEY, MODULE_CONTROLLER_METADATA_KEY, MODULE_PROVIDER_METADATA_KEY, MODULE_MODULE_METADATA_KEY, PARAMETER_METADATA, AFTER_MIDDLEWARE_METADATA, BEFORE_MIDDLEWARE_METADATA } from './contants';
 import { router, IMiddleware } from './router';
 
 import { Factory, Register } from './beanFactory';
 import { methodType, bootstrapMetadata } from './type';
+import { Context, Next } from 'koa';
 
 
 
 const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
   controllers.forEach((controllerItem:new (...args: any[]) => any)=> {
 
-    const midlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem);
+    const beforeMidlleCrl = Reflect.getMetadata(BEFORE_MIDDLEWARE_METADATA, controllerItem);
     // console.log("controllPathValue", controllerItem, midlle);
     
 
@@ -30,8 +31,10 @@ const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
     const realControllPath = controllPath.join('/');
 
     controllerFuncs.forEach((func:string | symbol) => {
-      const funcMidlle = Reflect.getMetadata(MIDDLEWARE_METADATA, controllerItem.prototype[func]);
-      //console.log("funcMidlle", funcMidlle);
+      const beforeMidlleFunc = Reflect.getMetadata(BEFORE_MIDDLEWARE_METADATA, controllerItem.prototype[func]);
+      //console.log("beforeMidlle", beforeMidlleFunc);
+      const afterMidlleFunc = Reflect.getMetadata(AFTER_MIDDLEWARE_METADATA, controllerItem.prototype[func]);
+      //console.log("beforeMidlle", afterMidlleFunc);
 
       const method:methodType = Reflect.getMetadata('METHOD_METADATA', controllerItem.prototype[func]);
      
@@ -47,15 +50,30 @@ const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
       }
       console.log("combinePath", `${method} ${combinePath}`);
 
-      const execFunc:Array<IMiddleware> = [];
-      if(midlle){
-        execFunc.push(midlle);
+      // const execFunc:Array<IMiddleware> = [];
+      // const beforeFunc:Array<Function> = [];
+
+      // if(midlle){
+      //   beforeFunc.push(midlle);
+      // }
+
+      // if(funcMidlle){
+      //   beforeFunc.push(funcMidlle);
+      // }
+      
+      // console.log(beforeFunc);
+
+      const beforeExecuteFunc = async (ctx: Context, next: Next) => {
+        beforeMidlleFunc && beforeMidlleFunc.map((func:any) =>  func());
+        await next();
       }
 
-      if(funcMidlle){
-        execFunc.push(funcMidlle);
+      const afterExecuteFunc = async (ctx: Context, next: Next) => {
+        await next();
+        afterMidlleFunc && afterMidlleFunc.map((func:any) =>  func(ctx));
       }
-      
+
+
       const realFunc = async (ctx:any) => {
         //console.log(ctx.request.body);
         const paramsMetadata:any[] = Reflect.getMetadata(PARAMETER_METADATA, controllerItem.prototype, func);
@@ -87,20 +105,20 @@ const controllerLoader = (controllers: Array<new (...args: any[]) => any>) => {
         ctx.body = res;
       }
 
-      execFunc.push(realFunc);
+      //execFunc.push(realFunc);
 
       switch(method){
         case 'get':
-          router.get(combinePath, ...execFunc);
+          router.get(combinePath, beforeExecuteFunc, afterExecuteFunc, realFunc);
           break;
         case 'post':
-          router.post(combinePath, ...execFunc);
+          router.post(combinePath, beforeExecuteFunc, afterExecuteFunc, realFunc);
           break;
         case 'put':
-          router.put(combinePath, ...execFunc);
+          router.put(combinePath, beforeExecuteFunc, afterExecuteFunc, realFunc);
           break;
         case 'delete':
-          router.delete(combinePath, ...execFunc);
+          router.delete(combinePath, beforeExecuteFunc, afterExecuteFunc, realFunc);
           break;
         default:
           throw new Error('error api method');

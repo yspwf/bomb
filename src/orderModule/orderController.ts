@@ -1,10 +1,10 @@
-import { Get, Post, Controller, Middleware } from '../../library';
+import { Get, Post, Controller } from '../../library';
 import { OrderService } from  './orderService';
 
-@Middleware(async (ctx:any, next:any)=>{
-  console.log('Middleware2');
-  await next();
-})
+// @Middleware(async (ctx:any, next:any)=>{
+//   console.log('Middleware2');
+//   await next();
+// })
 @Controller('order')
 export class OrderController{
   constructor(private readonly orderService: OrderService){}

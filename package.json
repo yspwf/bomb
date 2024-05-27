@@ -1,6 +1,6 @@
 {
   "name": "bomb_kit.js",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "ts api base on koa",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "koa-router": "^12.0.1",
     "mysql2": "^3.9.4",
     "reflect-metadata": "^0.2.2",
+    "swagger-decorator": "^0.0.22",
     "typeorm": "^0.3.20",
     "typescript": "^5.4.4"
   },
